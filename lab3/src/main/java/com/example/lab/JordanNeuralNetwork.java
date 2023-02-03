@@ -13,8 +13,8 @@ public final class JordanNeuralNetwork implements Serializable {
 		this.input = input;
 		this.hidden = hidden;
 		this.output = output;
-		weight1 = new NNMatrix(input + output, hidden);
-		weight2 = new NNMatrix(hidden, output);
+		weight1 = new NNMatrix(input + output + 1, hidden);
+		weight2 = new NNMatrix(hidden + 1, output);
 	}
 	
 	
@@ -36,6 +36,7 @@ public final class JordanNeuralNetwork implements Serializable {
 	//	public static float activation(float f) {
 	//		return (float) Math.sin(Math.atan(f));
 	//	}
+	//	
 	//	public static float derivative(float f) {
 	//		return (float) (1 / Math.pow(f * f + 1, 3f / 2));
 	//	}
@@ -62,55 +63,68 @@ public final class JordanNeuralNetwork implements Serializable {
 		final var in = NNVector.concat(input, context);
 		final var hidden = new NNVector(sizeHidden());
 		final var out = new NNVector(sizeOutput());
-		weight1.mult(in, hidden);
+		weight1.mult(up(in, 1), hidden);
 		activation(hidden);
-		weight2.mult(hidden, out);
+		weight2.mult(up(hidden, 1), out);
 		
 		final var errorOut = new NNVector(sizeOutput());
 		final var errorHidden = new NNVector(sizeHidden());
 		
 		output.sub(out, errorOut);
-		weight2.transposeMult(errorOut, errorHidden);
+		
+		final var error = errorOut.sqrLength();
+		if(error > 1E8) {
+			reset();
+			return learn(alpha, input, context, output);
+		}
+		
+		errorHidden.set(down(weight2.transposeMult(errorOut)));
 		
 		final var gradientOut = new NNVector(out);
 		final var gradientHidden = new NNVector(hidden);
 		
 		derivative(gradientHidden);
+		derivative(gradientOut);
 		
 		gradientOut.mul(errorOut);
 		gradientHidden.mul(errorHidden);
 		
-		gradientOut.mul(-alpha);
-		gradientHidden.mul(-alpha);
+		gradientOut.mul(alpha);
+		gradientHidden.mul(alpha);
 		
-		weight1.addMultMatrix(in, gradientHidden);
-		weight2.addMultMatrix(hidden, gradientOut);
+		weight1.addMultMatrix(up(in, 1), gradientHidden);
+		weight2.addMultMatrix(up(hidden, 1), gradientOut);
 		
 		//		normalize(weight1);
 		//		normalize(weight2);
 		
-		System.out.println(output);
-		System.out.println(in);
-		System.out.println(hidden);
-		System.out.println(out);
-		System.out.println(errorOut);
-		System.out.println(errorHidden);
-		System.out.println(gradientOut);
-		System.out.println(gradientHidden);
-		System.out.println(weight1);
-		System.out.println(weight2);
-		System.out.println();
+		//		System.out.println(output);
+		//		System.out.println(in);
+		//		System.out.println(hidden);
+		//		System.out.println(out);
+		//		System.out.println(errorOut);
+		//		System.out.println(errorHidden);
+		//		System.out.println(gradientOut);
+		//		System.out.println(gradientHidden);
+		//		System.out.println(weight1);
+		//		System.out.println(weight2);
+		//		System.out.println();
 		
-		return errorOut.sqrLength();
+		return error;
+	}
+	
+	private void reset() {
+		weight1.reset();
+		weight2.reset();
 	}
 	
 	private void normalize(NNMatrix matrix) {
 		for(int i = 0; i < matrix.output(); i++) {
 			float sum = 0;
-			for(int j = 0; j < matrix.input(); j++)
+			for(int j = 0; j < matrix.input() - 1; j++)
 				sum += matrix.get(j).get(i) * matrix.get(j).get(i);
 			sum = (float) Math.sqrt(sum);
-			for(int j = 0; j < matrix.input(); j++)
+			for(int j = 0; j < matrix.input() - 1; j++)
 				matrix.get(j).set(i, matrix.get(j).get(i) / sum);
 		}
 	}
@@ -141,9 +155,9 @@ public final class JordanNeuralNetwork implements Serializable {
 	public void test(NNVector input, NNVector context, NNVector output) {
 		input = NNVector.concat(input, context);
 		final var hidden = new NNVector(sizeHidden());
-		weight1.mult(input, hidden);
+		weight1.mult(up(input, 1), hidden);
 		activation(hidden);
-		weight2.mult(hidden, output);
+		weight2.mult(up(hidden, 1), output);
 	}
 	
 	private void activation(NNVector vector) {
@@ -158,12 +172,20 @@ public final class JordanNeuralNetwork implements Serializable {
 	
 	
 	public TestContext context() {
-		return new TestContext();
+		return context(new NNVector(sizeContext()));
+	}
+	
+	public TestContext context(NNVector context) {
+		return new TestContext(context);
 	}
 	
 	public final class TestContext {
 		
 		private final NNVector context = new NNVector(sizeContext());
+		
+		public TestContext(NNVector context) {
+			this.context.set(context);
+		}
 		
 		public NNVector test(NNVector input) {
 			final var out = new NNVector(sizeContext());
@@ -184,10 +206,6 @@ public final class JordanNeuralNetwork implements Serializable {
 			final var error = JordanNeuralNetwork.this.learn(alpha, input, context, output);
 			context.set(output);
 			return error;
-		}
-		
-		public void setContext(NNVector context) {
-			this.context.set(context);
 		}
 		
 	}

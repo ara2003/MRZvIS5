@@ -3,6 +3,8 @@ package com.example.lab;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.example.lab.JordanNeuralNetwork.TestContext;
+
 public final class NNSequence {
 	
 	private final Collection<? extends Float> sequence;
@@ -45,7 +47,7 @@ public final class NNSequence {
 	}
 	
 	public void learn(float errorLimit, float alpha) {
-		final var context = nn.context();
+		TestContext context = null;
 		final var tests = split(sequence, nn.sizeInput(), nn.sizeOutput());
 		
 		float e;
@@ -54,13 +56,13 @@ public final class NNSequence {
 			final var iter = tests.iterator();
 			if(iter.hasNext()) {
 				final var test = iter.next();
-				context.setContext(test.second());
+				context = nn.context(test.second());
 			}
 			while(iter.hasNext()) {
 				final var test = iter.next();
 				e += context.learn(alpha, test.first(), test.second());
 			}
-			System.out.println("error: " + (e / errorLimit));
+			//			System.out.println("error: " + (e / errorLimit));
 		}while(e > errorLimit);
 		
 	}

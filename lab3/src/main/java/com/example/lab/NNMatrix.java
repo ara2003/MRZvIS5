@@ -139,4 +139,10 @@ public class NNMatrix implements Serializable {
 		return dest;
 	}
 	
+	public void reset() {
+		for(int i = 0; i < input(); i++)
+			for(int j = 0; j < output(); j++)
+				get(i).set(j, (float) (Math.random() * 2 - 1));
+	}
+	
 }
