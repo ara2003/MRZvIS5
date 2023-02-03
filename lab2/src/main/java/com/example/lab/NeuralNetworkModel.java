@@ -80,13 +80,14 @@ public class NeuralNetworkModel implements AutoCloseable {
 	
 	
 	public void run() throws FileNotFoundException, IOException {
+		loop :
 		while(true) {
 			final var c = input("task(LEARN, TEST, EXIT)", "L").substring(0, 1).toUpperCase();
 			switch(c) {
 				case "L" -> run_learn();
 				case "T" -> run_test();
 				case "E" -> {
-					return;
+					break loop;
 				}
 			}
 		}

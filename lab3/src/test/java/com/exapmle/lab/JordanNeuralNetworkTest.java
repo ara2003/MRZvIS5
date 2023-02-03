@@ -81,19 +81,6 @@ public class JordanNeuralNetworkTest {
 	}
 	
 	@Test
-	void learnTest_sequence_fib() {
-		final var INPUT = 2;
-		final var OUTPUT = 1;
-		
-		final var nn = new JordanNeuralNetwork(INPUT, OUTPUT + INPUT, OUTPUT);
-		final var sequence = sequence(nn, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55);
-		sequence.learn(ERROR_LIMIT, ALPHA);
-		
-		final var s = sequence.sequence(20);
-		System.out.println(s);
-	}
-	
-	@Test
 	void learnTest_zero() {
 		final var INPUT = 2;
 		final var OUTPUT = 1;

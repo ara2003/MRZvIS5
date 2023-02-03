@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class NeuralNetworkModel implements AutoCloseable {
@@ -55,6 +54,8 @@ public class NeuralNetworkModel implements AutoCloseable {
 	
 	private static void serializetion(File file, JordanNeuralNetwork nn)
 			throws FileNotFoundException, IOException {
+		file.getParentFile().mkdirs();
+		file.createNewFile();
 		try(final var fout = new FileOutputStream(file)) {
 			try(final var oout = new ObjectOutputStream(fout)) {
 				oout.writeObject(nn);
@@ -88,7 +89,46 @@ public class NeuralNetworkModel implements AutoCloseable {
 	}
 	
 	private String getFileName() {
+		//		return "res/nn/file1";
 		return "res/nn/" + sizeInput() + " " + sizeHidden() + " " + sizeOutput();
+	}
+	
+	public void run() {
+		loop :
+		while(true) {
+			final var c = input("task(LEARN, TEST, SEQUENCE, EXIT)", "L").substring(0, 1)
+					.toUpperCase();
+			switch(c) {
+				case "L" -> run_learn();
+				case "T" -> run_test();
+				case "S" -> run_sequence();
+				case "E" -> {
+					break loop;
+				}
+			}
+		}
+	}
+	
+	private void run_sequence() {
+		final var s = new NNSequence(nn, sequence);
+		final var size = inputInt("size", 10);
+		final var sequence = s.sequence(size);
+		System.out.println("sequence: " + sequence);
+	}
+	
+	private void run_test() {
+		final var init_context = inputVector("context (" + nn.sizeContext() + ")");
+		final var input = inputVector("input (" + nn.sizeInput() + ")");
+		final var output = new NNVector(nn.sizeOutput());
+		nn.test(input, init_context, output);
+		System.out.println("output: " + output);
+	}
+	
+	private void run_learn() {
+		final var s = new NNSequence(nn, sequence);
+		final var errorlimit = inputFloat("error limit", .000001f);
+		final var alpha = inputFloat("alpha", .001f);
+		s.learn(errorlimit, alpha, true);
 	}
 	
 }

@@ -47,7 +47,7 @@ public final class NNSequence {
 		return result;
 	}
 	
-	public void learn(float errorLimit, float alpha) {
+	public void learn(float errorLimit, float alpha, boolean log) {
 		TestContext context = null;
 		final var tests = split(sequence, nn.sizeInput(), nn.sizeOutput());
 		
@@ -63,6 +63,8 @@ public final class NNSequence {
 				final var test = iter.next();
 				e += context.learn(alpha, test.first(), test.second());
 			}
+			if(log)
+				System.out.println("error: " + e / errorLimit);
 		}while(e > errorLimit);
 	}
 	
@@ -101,6 +103,10 @@ public final class NNSequence {
 			vector.set(i, vector.get(i + 1));
 		}
 		vector.set(vector.size() - 1, x);
+	}
+	
+	public void learn(float errorlimit, float alpha) {
+		learn(errorlimit, alpha, false);
 	}
 	
 }

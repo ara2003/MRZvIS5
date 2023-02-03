@@ -27,6 +27,16 @@ public class Input {
 		return Float.parseFloat(input(name));
 	}
 	
+	public static NNVector inputVector(String name) {
+		System.out.print(name + ": ");
+		final var elements = sc.nextLine().split(" ");
+		final var result = new NNVector(elements.length);
+		for(int i = 0; i < elements.length; i++) {
+			result.set(i, Float.parseFloat(elements[i]));
+		}
+		return result;
+	}
+	
 	public static List<Float> inputFloatList(String name) {
 		System.out.print(name + ": ");
 		final var line = sc.nextLine();
