@@ -97,9 +97,8 @@ public class NeuralNetworkModel implements AutoCloseable {
 		return "res/nn/" + size;
 	}
 	
-	private Image inputImage() throws FileNotFoundException, IOException {
-		final var file = input("image file");
-		return getImageFromFile("res/img/" + file + ".txt");
+	private Image inputImage(String name) throws FileNotFoundException, IOException {
+		return getImageFromFile("res/img/" + name + ".txt");
 	}
 	
 	private void printImage(NNVector res, int lineSize) {
@@ -113,21 +112,26 @@ public class NeuralNetworkModel implements AutoCloseable {
 	private void run_learn() throws FileNotFoundException, IOException {
 		final var count = inputInt("images count", 2);
 		final var images = new ArrayList<NNVector>();
+		final var names = new ArrayList<String>();
 		final var sizes = new ArrayList<Integer>();
 		for(var i = 0; i < count; i++) {
-			final var img = inputImage();
+			final var name = input("image file");
+			final var img = inputImage(name);
 			images.add(img.vector);
 			sizes.add(img.lineSize);
+			names.add(name);
 		}
 		nn.learn(images);
 		for(int i = 0; i < sizes.size(); i++) {
 			final var res = nn.test(images.get(i));
+			System.out.println(names.get(i));
 			printImage(res, sizes.get(i));
 		}
 	}
 	
 	private void run_test() throws FileNotFoundException, IOException {
-		final var img = inputImage();
+		final var name = input("image file");
+		final var img = inputImage(name);
 		final var res = nn.test(img.vector);
 		printImage(res, img.lineSize);
 	}
