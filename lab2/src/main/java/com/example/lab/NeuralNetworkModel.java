@@ -43,7 +43,8 @@ public class NeuralNetworkModel implements AutoCloseable {
 		return new Image(new NNVector(fs), size);
 	}
 	
-	private static NeuralNetwork deSerializetion(File file) throws FileNotFoundException, IOException, ClassNotFoundException {
+	private static NeuralNetwork deSerializetion(File file)
+			throws FileNotFoundException, IOException, ClassNotFoundException {
 		try(final var fin = new FileInputStream(file)) {
 			try(final var oin = new ObjectInputStream(fin)) {
 				return (NeuralNetwork) oin.readObject();
@@ -60,7 +61,8 @@ public class NeuralNetworkModel implements AutoCloseable {
 		}
 	}
 	
-	private static void serializetion(File file, NeuralNetwork nn) throws FileNotFoundException, IOException {
+	private static void serializetion(File file, NeuralNetwork nn)
+			throws FileNotFoundException, IOException {
 		try(final var fout = new FileOutputStream(file)) {
 			try(final var oout = new ObjectOutputStream(fout)) {
 				oout.writeObject(nn);
@@ -78,14 +80,13 @@ public class NeuralNetworkModel implements AutoCloseable {
 	
 	
 	public void run() throws FileNotFoundException, IOException {
-		loop :
 		while(true) {
 			final var c = input("task(LEARN, TEST, EXIT)", "L").substring(0, 1).toUpperCase();
 			switch(c) {
 				case "L" -> run_learn();
 				case "T" -> run_test();
 				case "E" -> {
-					break loop;
+					return;
 				}
 			}
 		}

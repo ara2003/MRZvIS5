@@ -51,11 +51,16 @@ public final class NNSequence {
 		float e;
 		do {
 			e = 0;
-			context.clear();
-			for(var test : tests) {
+			final var iter = tests.iterator();
+			if(iter.hasNext()) {
+				final var test = iter.next();
+				context.setContext(test.second());
+			}
+			while(iter.hasNext()) {
+				final var test = iter.next();
 				e += context.learn(alpha, test.first(), test.second());
 			}
-			//			System.out.println("error: " + (e / errorLimit));
+			System.out.println("error: " + (e / errorLimit));
 		}while(e > errorLimit);
 		
 	}
