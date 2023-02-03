@@ -2,15 +2,16 @@ package com.example.lab;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.example.lab.JordanNeuralNetwork.TestContext;
 
 public final class NNSequence {
 	
-	private final Collection<? extends Float> sequence;
+	private final List<? extends Float> sequence;
 	private final JordanNeuralNetwork nn;
 	
-	public NNSequence(JordanNeuralNetwork nn, Collection<? extends Float> sequence) {
+	public NNSequence(JordanNeuralNetwork nn, List<? extends Float> sequence) {
 		this.sequence = sequence;
 		this.nn = nn;
 	}
@@ -62,9 +63,44 @@ public final class NNSequence {
 				final var test = iter.next();
 				e += context.learn(alpha, test.first(), test.second());
 			}
-			//			System.out.println("error: " + (e / errorLimit));
 		}while(e > errorLimit);
+	}
+	
+	public List<Float> sequence(int size) {
+		final var list = new ArrayList<Float>();
+		final TestContext context;
+		{
+			final var init_contex = new NNVector(nn.sizeContext());
+			for(int i = 0; i < nn.sizeInput() + nn.sizeContext(); i++) {
+				final var e = sequence.get(i);
+				list.add(e);
+			}
+			for(int i = 0; i < nn.sizeContext(); i++) {
+				final var e = sequence.get(nn.sizeInput() + i);
+				init_contex.set(i, e);
+			}
+			context = nn.context(init_contex);
+		}
 		
+		final var test = new NNVector(nn.sizeInput());
+		
+		for(int i = 0; i < nn.sizeInput(); i++)
+			test.set(i, sequence.get(i + 1));
+		
+		while(list.size() <= size) {
+			var e = context.test(test).get(0);
+			//			e = (float) Math.round(e);
+			slide(test, e);
+			list.add(e);
+		}
+		return list;
+	}
+	
+	private void slide(NNVector vector, float x) {
+		for(int i = 0; i < vector.size() - 1; i++) {
+			vector.set(i, vector.get(i + 1));
+		}
+		vector.set(vector.size() - 1, x);
 	}
 	
 }

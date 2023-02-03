@@ -17,30 +17,6 @@ public final class JordanNeuralNetwork implements Serializable {
 		weight2 = new NNMatrix(hidden + 1, output);
 	}
 	
-	
-	public static float activation(float f) {
-		return f;
-	}
-	
-	public static float derivative(float f) {
-		return 1;
-	}
-	
-	//	public static float activation(float f) {
-	//		return (float) (1 / (1 + Math.exp(-f)));
-	//	}
-	//	public static float derivative(float f) {
-	//		return (1 - f) * f;
-	//	}
-	
-	//	public static float activation(float f) {
-	//		return (float) Math.sin(Math.atan(f));
-	//	}
-	//	
-	//	public static float derivative(float f) {
-	//		return (float) (1 / Math.pow(f * f + 1, 3f / 2));
-	//	}
-	
 	public int sizeHidden() {
 		return hidden;
 	}
@@ -64,7 +40,6 @@ public final class JordanNeuralNetwork implements Serializable {
 		final var hidden = new NNVector(sizeHidden());
 		final var out = new NNVector(sizeOutput());
 		weight1.mult(up(in, 1), hidden);
-		activation(hidden);
 		weight2.mult(up(hidden, 1), out);
 		
 		final var errorOut = new NNVector(sizeOutput());
@@ -80,23 +55,14 @@ public final class JordanNeuralNetwork implements Serializable {
 		
 		errorHidden.set(down(weight2.transposeMult(errorOut)));
 		
-		final var gradientOut = new NNVector(out);
-		final var gradientHidden = new NNVector(hidden);
-		
-		derivative(gradientHidden);
-		derivative(gradientOut);
-		
-		gradientOut.mul(errorOut);
-		gradientHidden.mul(errorHidden);
+		final var gradientOut = new NNVector(errorOut);
+		final var gradientHidden = new NNVector(errorHidden);
 		
 		gradientOut.mul(alpha);
 		gradientHidden.mul(alpha);
 		
 		weight1.addMultMatrix(up(in, 1), gradientHidden);
 		weight2.addMultMatrix(up(hidden, 1), gradientOut);
-		
-		//		normalize(weight1);
-		//		normalize(weight2);
 		
 		//		System.out.println(output);
 		//		System.out.println(in);
@@ -117,18 +83,6 @@ public final class JordanNeuralNetwork implements Serializable {
 		weight1.reset();
 		weight2.reset();
 	}
-	
-	private void normalize(NNMatrix matrix) {
-		for(int i = 0; i < matrix.output(); i++) {
-			float sum = 0;
-			for(int j = 0; j < matrix.input() - 1; j++)
-				sum += matrix.get(j).get(i) * matrix.get(j).get(i);
-			sum = (float) Math.sqrt(sum);
-			for(int j = 0; j < matrix.input() - 1; j++)
-				matrix.get(j).set(i, matrix.get(j).get(i) / sum);
-		}
-	}
-	
 	
 	private NNVector up(NNVector vector, float x) {
 		final var result = new NNVector(vector.size() + 1);
@@ -156,20 +110,8 @@ public final class JordanNeuralNetwork implements Serializable {
 		input = NNVector.concat(input, context);
 		final var hidden = new NNVector(sizeHidden());
 		weight1.mult(up(input, 1), hidden);
-		activation(hidden);
 		weight2.mult(up(hidden, 1), output);
 	}
-	
-	private void activation(NNVector vector) {
-		for(int i = 0; i < vector.size(); i++)
-			vector.set(i, activation(vector.get(i)));
-	}
-	
-	private void derivative(NNVector vector) {
-		for(int i = 0; i < vector.size(); i++)
-			vector.set(i, derivative(vector.get(i)));
-	}
-	
 	
 	public TestContext context() {
 		return context(new NNVector(sizeContext()));
