@@ -54,14 +54,11 @@ public final class JordanNeuralNetwork implements Serializable {
 		}
 		weight2.transposeMult(errorOut, errorHidden);
 		
-		final var gradientOut = new NNVector(errorOut);
-		final var gradientHidden = new NNVector(errorHidden);
+		errorOut.mul(alpha);
+		errorHidden.mul(alpha);
 		
-		gradientOut.mul(alpha);
-		gradientHidden.mul(alpha);
-		
-		weight1.addMultMatrix(in, gradientHidden);
-		weight2.addMultMatrix(hidden, gradientOut);
+		weight1.addMultMatrix(in, errorHidden);
+		weight2.addMultMatrix(hidden, errorOut);
 		
 		//		System.out.println(output);
 		//		System.out.println(in);
@@ -69,8 +66,6 @@ public final class JordanNeuralNetwork implements Serializable {
 		//		System.out.println(out);
 		//		System.out.println(errorOut);
 		//		System.out.println(errorHidden);
-		//		System.out.println(gradientOut);
-		//		System.out.println(gradientHidden);
 		//		System.out.println(weight1);
 		//		System.out.println(weight2);
 		//		System.out.println();
