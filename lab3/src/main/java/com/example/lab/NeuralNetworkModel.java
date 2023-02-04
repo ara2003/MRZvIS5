@@ -117,11 +117,11 @@ public class NeuralNetworkModel implements AutoCloseable {
 	}
 	
 	private void run_test() {
-		final var init_context = inputVector("context (" + nn.sizeContext() + ")");
-		final var input = inputVector("input (" + nn.sizeInput() + ")");
+		final var input = inputVector("previous values for prediction (length:" + nn.sizeInput() + ")");
+		final var init_context = new NNVector(input.get(input.size() - 1));
 		final var output = new NNVector(nn.sizeOutput());
 		nn.test(input, init_context, output);
-		System.out.println("output: " + output);
+		System.out.println("output: " + output.get(0));
 	}
 	
 	private void run_learn() {
