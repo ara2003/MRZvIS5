@@ -34,12 +34,11 @@ public class NeuralNetworkModel implements AutoCloseable {
 		}
 		str = str.replace("\t", "");
 		str = str.replace("\r", "");
-		str = str.replace(" ", "");
 		final var size = str.indexOf("\n");
 		str = str.replace("\n", "");
 		final var fs = new float[str.length()];
 		for(var i = 0; i < fs.length; i++)
-			fs[i] = str.charAt(i) == '1' ? 1 : -1;
+			fs[i] = str.charAt(i) == ' ' ? -1 : 1;
 		return new Image(new NNVector(fs), size);
 	}
 	
@@ -103,7 +102,7 @@ public class NeuralNetworkModel implements AutoCloseable {
 	
 	private void printImage(NNVector res, int lineSize) {
 		for(var i = 0; i < res.size(); i++) {
-			System.out.print(res.get(i) >= 0 ? "1" : "0");
+			System.out.print(res.get(i) >= 0 ? "1" : " ");
 			if(i % lineSize == lineSize - 1)
 				System.out.println();
 		}
