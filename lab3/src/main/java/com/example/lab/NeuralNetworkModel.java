@@ -126,8 +126,8 @@ public class NeuralNetworkModel implements AutoCloseable {
 	
 	private void run_learn() {
 		final var s = new NNSequence(nn, sequence);
-		final var errorlimit = inputFloat("error limit", .000001f);
-		final var alpha = inputFloat("alpha", .001f);
+		final var errorlimit = inputFloat("error limit", 1) * .000001f;
+		final var alpha = inputFloat("alpha", .1f) * .01f;
 		s.learn(errorlimit, alpha, true);
 	}
 	
