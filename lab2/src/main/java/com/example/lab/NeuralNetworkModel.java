@@ -131,7 +131,10 @@ public class NeuralNetworkModel implements AutoCloseable {
 	private void run_test() throws FileNotFoundException, IOException {
 		final var name = input("image file");
 		final var img = inputImage(name);
+		System.out.println("corrupted image");
+		printImage(img.vector, img.lineSize);
 		final var res = nn.test(img.vector);
+		System.out.println("image");
 		printImage(res, img.lineSize);
 	}
 	
