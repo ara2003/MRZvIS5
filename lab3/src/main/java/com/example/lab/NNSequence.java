@@ -51,6 +51,7 @@ public final class NNSequence {
 		TestContext context = null;
 		final var tests = split(sequence, nn.sizeInput(), nn.sizeOutput());
 		
+		int iteration = 0;
 		float e;
 		do {
 			e = 0;
@@ -64,7 +65,7 @@ public final class NNSequence {
 				e += context.learn(alpha, test.first(), test.second());
 			}
 			if(log)
-				System.out.println("error: " + e / errorLimit);
+				System.out.println("error: " + e / errorLimit + " iteration:" + (iteration++));
 		}while(e > errorLimit);
 	}
 	
