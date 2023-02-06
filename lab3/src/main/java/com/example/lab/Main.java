@@ -20,9 +20,8 @@ public class Main {
 			case 3 -> list(1, 0, -1, 0, 1, 0, -1, 0, 1, 0, -1);
 			default -> inputFloatList("sequence");
 		};
-		final var input = inputInt("window size", 2);
-		final var hidden = input;
-		try(final var model = new NeuralNetworkModel(sequence, input, hidden, 1)) {
+		final var size = inputInt("size", 2);
+		try(final var model = new NeuralNetworkModel(sequence, size)) {
 			model.run();
 		}
 	}

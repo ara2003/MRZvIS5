@@ -15,6 +15,17 @@ public class NNVector implements Iterable<Float>, Serializable {
 		this.values = values.clone();
 	}
 	
+	public NNVector inverse() {
+		return inverse(this);
+	}
+	
+	public NNVector inverse(NNVector dest) {
+		checkSize(dest, this);
+		for(int i = 0; i < size(); i++)
+			dest.set(i, 1 - get(i));
+		return dest;
+	}
+
 	@Override
 	public String toString() {
 		return Arrays.toString(values);
@@ -158,6 +169,21 @@ public class NNVector implements Iterable<Float>, Serializable {
 		for(int i = 0; i < values.length; i++)
 			values[i] = 0;
 		
+	}
+
+	public NNVector add(NNVector vec, NNVector dest) {
+		checkSize(vec, dest);
+		checkSize(vec, this);
+		for(int i = 0; i < vec.size(); i++)
+			dest.set(i, get(i) + vec.get(i));
+		return dest;
+	}
+
+	public NNVector sqrt(NNVector dest) {
+		checkSize(this, dest);
+		for(int i = 0; i < size(); i++)
+			dest.set(i, (float)Math.sqrt(get(i)));
+		return dest;
 	}
 	
 }

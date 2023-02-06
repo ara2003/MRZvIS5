@@ -1,6 +1,9 @@
 package com.example.lab;
 
-import static com.example.lab.Input.*;
+import static com.example.lab.Input.input;
+import static com.example.lab.Input.inputFloat;
+import static com.example.lab.Input.inputInt;
+import static com.example.lab.Input.inputVector;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,46 +16,43 @@ import java.util.List;
 
 public class NeuralNetworkModel implements AutoCloseable {
 	
-	private final JordanNeuralNetwork nn;
+	private final GRUNeuralNetwork nn;
 	
 	
-	private final int input, hidden, output;
+	private final int size;
 	
 	private final List<Float> sequence;
 	
-	public NeuralNetworkModel(List<Float> sequence, int input, int hidden, int output) {
+	public NeuralNetworkModel(List<Float> sequence, int size) {
 		this.sequence = sequence;
-		this.input = input;
-		this.hidden = hidden;
-		this.output = output;
+		this.size = size;
 		final var file = new File(getFileName());
 		
 		if(file.exists())
-			nn = deSerializetionOrDefault(file, input, hidden, output);
+			nn = deSerializetionOrDefault(file, size);
 		else
-			nn = new JordanNeuralNetwork(input, hidden, output);
+			nn = new GRUNeuralNetwork(size);
 	}
 	
-	private static JordanNeuralNetwork deSerializetion(File file)
+	private static GRUNeuralNetwork deSerializetion(File file)
 			throws FileNotFoundException, IOException, ClassNotFoundException {
 		try(final var fin = new FileInputStream(file)) {
 			try(final var oin = new ObjectInputStream(fin)) {
-				return (JordanNeuralNetwork) oin.readObject();
+				return (GRUNeuralNetwork) oin.readObject();
 			}
 		}
 	}
 	
-	private static JordanNeuralNetwork deSerializetionOrDefault(File file, int input, int hidden,
-			int output) {
+	private static GRUNeuralNetwork deSerializetionOrDefault(File file, int size) {
 		try {
 			return deSerializetion(file);
 		}catch(Exception e) {
 			e.printStackTrace();
-			return new JordanNeuralNetwork(input, hidden, output);
+			return new GRUNeuralNetwork(size);
 		}
 	}
 	
-	private static void serializetion(File file, JordanNeuralNetwork nn)
+	private static void serializetion(File file, GRUNeuralNetwork nn)
 			throws FileNotFoundException, IOException {
 		file.getParentFile().mkdirs();
 		file.createNewFile();
@@ -71,26 +71,13 @@ public class NeuralNetworkModel implements AutoCloseable {
 		}
 	}
 	
-	public int sizeContext() {
-		return output;
-	}
-	
-	public int sizeHidden() {
-		return hidden;
-	}
-	
-	public int sizeInput() {
-		return input;
-	}
-	
-	
-	public int sizeOutput() {
-		return output;
+	public int size() {
+		return size;
 	}
 	
 	private String getFileName() {
 		//		return "res/nn/file1";
-		return "res/nn/" + sizeInput() + " " + sizeHidden() + " " + sizeOutput();
+		return "res/nn/" + size;
 	}
 	
 	public void run() {
@@ -117,9 +104,9 @@ public class NeuralNetworkModel implements AutoCloseable {
 	}
 	
 	private void run_test() {
-		final var input = inputVector("previous values for prediction (length:" + nn.sizeInput() + ")");
-		final var init_context = new NNVector(input.get(input.size() - 1));
-		final var output = new NNVector(nn.sizeOutput());
+		final var input = inputVector("previous values for prediction (length:" + nn.size() + ")");
+		final var init_context = new NNVector(input);
+		final var output = new NNVector(nn.size());
 		nn.test(input, init_context, output);
 		System.out.println("output: " + output.get(0));
 	}

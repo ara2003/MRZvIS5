@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.example.lab.JordanNeuralNetwork.TestContext;
+import com.example.lab.GRUNeuralNetwork.TestContext;
 
 public final class NNSequence {
 	
 	private final List<? extends Float> sequence;
-	private final JordanNeuralNetwork nn;
+	private final GRUNeuralNetwork nn;
 	
-	public NNSequence(JordanNeuralNetwork nn, List<? extends Float> sequence) {
+	public NNSequence(GRUNeuralNetwork nn, List<? extends Float> sequence) {
 		this.sequence = sequence;
 		this.nn = nn;
 	}
@@ -48,46 +48,66 @@ public final class NNSequence {
 	}
 	
 	public void learn(float errorLimit, float alpha, boolean log) {
+		learn(errorLimit, 100000, alpha, log);
+	}
+		
+	public void learn(float errorLimit, int iterationLimit, float alpha, boolean log) {
 		TestContext context = null;
-		final var tests = split(sequence, nn.sizeInput(), nn.sizeOutput());
+		final var tests = split(sequence, nn.size(), nn.size());
 		
 		int iteration = 0;
 		float e;
-		do {
+		while(iteration < iterationLimit) {
 			e = 0;
-			final var iter = tests.iterator();
-			if(iter.hasNext()) {
-				final var test = iter.next();
-				context = nn.context(test.second());
-			}
-			while(iter.hasNext()) {
-				final var test = iter.next();
-				e += context.learn(alpha, test.first(), test.second());
+			{
+    			final var iter = tests.iterator();
+    			if(iter.hasNext()) {
+    				final var test = iter.next();
+    				context = nn.context(test.second());
+    			}
+    			while(iter.hasNext()) {
+    				final var test = iter.next();
+    				e += context.get_error(test.first(), test.second());
+    			}
 			}
 			if(log)
-				System.out.println("error: " + e / errorLimit + " iteration:" + (iteration++));
-		}while(e > errorLimit);
+				System.out.println("error: " + (e / errorLimit) + " iteration:" + iteration);
+			context.clear();
+			if(e > errorLimit) 
+			{
+				iteration++;
+    			final var iter = tests.iterator();
+    			if(iter.hasNext()) {
+    				final var test = iter.next();
+    				context = nn.context(test.second());
+    			}
+    			while(iter.hasNext()) {
+    				final var test = iter.next();
+    				context.learn(alpha, test.first(), test.second());
+    			}
+			}else break;
+		}
 	}
 	
 	public List<Float> sequence(int size) {
 		final var list = new ArrayList<Float>();
 		final TestContext context;
 		{
-			final var init_contex = new NNVector(nn.sizeContext());
-			for(int i = 0; i < nn.sizeInput() + nn.sizeContext(); i++) {
+			final var init_contex = new NNVector(nn.size());
+			for(int i = 0; i < nn.size() + nn.size(); i++) {
 				final var e = sequence.get(i);
 				list.add(e);
 			}
-			for(int i = 0; i < nn.sizeContext(); i++) {
-				final var e = sequence.get(nn.sizeInput() + i);
+			for(int i = 0; i < nn.size(); i++) {
+				final var e = sequence.get(nn.size() + i);
 				init_contex.set(i, e);
 			}
 			context = nn.context(init_contex);
 		}
 		
-		final var test = new NNVector(nn.sizeInput());
+		final var test = new NNVector(nn.size());
 		
-		for(int i = 0; i < nn.sizeInput(); i++)
+		for(int i = 0; i < nn.size(); i++)
 			test.set(i, sequence.get(i + 1));
 		
 		while(list.size() <= size) {

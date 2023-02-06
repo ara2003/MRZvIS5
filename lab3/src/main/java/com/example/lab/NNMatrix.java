@@ -87,9 +87,9 @@ public class NNMatrix implements Serializable {
 	
 	public NNVector mult(NNVector vector, NNVector dest) {
 		if(vector.size() != input())
-			throw new IllegalArgumentException(input() + " != " + vector.size());
+			throw new IllegalArgumentException("input " + input() + " != " + vector.size());
 		if(dest.size() != output())
-			throw new IllegalArgumentException(output() + " != " + dest.size());
+			throw new IllegalArgumentException("output " + output() + " != " + dest.size());
 		for(var i = 0; i < input(); i++) {
 			final var l = get(i);
 			for(var j = 0; j < output(); j++)
